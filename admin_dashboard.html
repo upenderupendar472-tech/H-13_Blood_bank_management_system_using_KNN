@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SBMP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="blood-background">
+        <div class="blood-drops">
+            <div class="blood-drop"></div>
+            <div class="blood-drop"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">SBMP Admin</h1>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-cog"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Donors</h3>
+                    <p class="stat-number">{{ total_donors }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Patients</h3>
+                    <p class="stat-number">{{ total_patients }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Requests</h3>
+                    <p class="stat-number">{{ recent_requests|length }}</p>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h3><i class="fas fa-tint"></i> Blood Inventory</h3>
+                <div class="inventory-grid">
+                    {% for item in blood_inventory %}
+                        <div class="inventory-item {% if item.units_available < 5 %}low-stock{% elif item.units_available > 20 %}high-stock{% endif %}">
+                            <h4>{{ item.blood_group }}</h4>
+                            <p class="units">{{ item.units_available }} units</p>
+                            <p class="update-time">Updated: {{ item.last_updated[:16] }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h3><i class="fas fa-history"></i> Recent Blood Requests</h3>
+                <div class="requests-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Blood Group</th>
+                                <th>Units</th>
+                                <th>Urgency</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in recent_requests %}
+                                <tr>
+                                    <td>{{ request.name }}</td>
+                                    <td>{{ request.blood_group }}</td>
+                                    <td>{{ request.units_needed }}</td>
+                                    <td class="urgency-{{ request.urgency.lower() }}">{{ request.urgency }}</td>
+                                    <td class="status-{{ request.status.lower().replace(' ', '-') }}">{{ request.status }}</td>
+                                    <td>{{ request.request_date[:16] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Blood Bank Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="blood-background">
+        <div class="blood-drops">
+            <div class="blood-drop"></div>
+            <div class="blood-drop"></div>
+            <div class="blood-drop"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo heartbeat">
+                <i class="fas fa-tint"></i> SBMP
+            </h1>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('donor_register') }}"><i class="fas fa-user-plus"></i> Be a Donor</a></li>
+                <li><a href="{{ url_for('patient_request') }}"><i class="fas fa-hand-holding-medical"></i> Request Blood</a></li>
+                <li><a href="{{ url_for('search_donors') }}"><i class="fas fa-search"></i> Find Donors</a></li>
+                {% if session.user_id %}
+                    {% if session.user_type == 'admin' %}
+                        <li><a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-cog"></i> Admin</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout ({{ session.username }})</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="hero blood-pulse">
+            <h1>Smart Blood Management Platform</h1>
+            <p>Using KNN Algorithm for Intelligent Donor Matching</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('donor_register') }}" class="btn btn-primary">
+                    <i class="fas fa-heartbeat"></i> Register as Donor
+                </a>
+                <a href="{{ url_for('patient_request') }}" class="btn btn-secondary">
+                    <i class="fas fa-hand-holding-medical"></i> Request Blood
+                </a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}exclamation-triangle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="features">
+            <div class="feature-card">
+                <i class="fas fa-brain fa-3x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>AI-Powered Matching</h3>
+                <p>KNN algorithm finds the most suitable donors based on location and compatibility with intelligent matching</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line fa-3x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>Real-time Inventory</h3>
+                <p>Track blood stock levels in real-time across all blood groups with predictive analytics</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bolt fa-3x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>Emergency Response</h3>
+                <p>Quick donor identification during critical situations with instant notifications</p>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat-item">
+                <i class="fas fa-users fa-2x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>Available Donors</h3>
+                <p class="stat-number" id="donor-count">Loading...</p>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-hand-holding-heart fa-2x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>Active Requests</h3>
+                <p class="stat-number" id="request-count">Loading...</p>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-heart fa-2x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>Lives Saved</h3>
+                <p class="stat-number">100+</p>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-clock fa-2x" style="color: #dc143c; margin-bottom: 1rem;"></i>
+                <h3>Response Time</h3>
+                <p class="stat-number">< 15min</p>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>How KNN Algorithm Works</h3>
+                <p>Our system uses K-Nearest Neighbors machine learning algorithm to:</p>
+                <ul style="text-align: left; margin-top: 1rem;">
+                    <li>🔍 Analyze donor proximity using Euclidean distance</li>
+                    <li>🩸 Match blood group compatibility automatically</li>
+                    <li>📍 Consider geographical location for faster response</li>
+                    <li>⚡ Process emergency requests with priority ranking</li>
+                    <li>📊 Learn from successful matches to improve accuracy</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Fetch real-time stats
+        fetch('/api/donors')
+            .then(response => response.json())
+            .then(donors => {
+                document.getElementById('donor-count').textContent = donors.length;
+            });
+
+        fetch('/api/inventory')
+            .then(response => response.json())
+            .then(inventory => {
+                let totalRequests = inventory.reduce((sum, item) => sum + item.units_available, 0);
+                document.getElementById('request-count').textContent = totalRequests;
+            });
+    </script>
+</body>
+</html>

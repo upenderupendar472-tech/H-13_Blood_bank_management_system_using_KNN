@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Donors - SBMP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="blood-background">
+        <div class="blood-drops">
+            <div class="blood-drop"></div>
+            <div class="blood-drop"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">SBMP</h1>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('donor_register') }}"><i class="fas fa-user-plus"></i> Be a Donor</a></li>
+                <li><a href="{{ url_for('patient_request') }}"><i class="fas fa-hand-holding-medical"></i> Request Blood</a></li>
+                <li><a href="{{ url_for('search_donors') }}"><i class="fas fa-search"></i> Find Donors</a></li>
+                {% if session.user_id %}
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="search-section">
+            <h2><i class="fas fa-search"></i> Find Blood Donors</h2>
+            
+            <form method="GET" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="blood_group">Blood Group:</label>
+                        <select id="blood_group" name="blood_group">
+                            <option value="">Any Blood Group</option>
+                            <option value="A+" {% if search_blood_group == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if search_blood_group == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if search_blood_group == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if search_blood_group == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if search_blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if search_blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                            <option value="O+" {% if search_blood_group == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if search_blood_group == 'O-' %}selected{% endif %}>O-</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location:</label>
+                        <input type="text" id="location" name="location" placeholder="Enter location..." value="{{ request.args.get('location', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search Donors
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-section">
+            <h3>Available Donors</h3>
+            
+            {% if donors %}
+                <div class="donors-grid">
+                    {% for donor in donors %}
+                        <div class="donor-card">
+                            <h4>{{ donor.name }}</h4>
+                            <p><strong>Blood Group:</strong> <span class="blood-group">{{ donor.blood_group }}</span></p>
+                            <p><strong>Location:</strong> {{ donor.location }}</p>
+                            <p><strong>Age:</strong> {{ donor.age }}</p>
+                            <p><strong>Phone:</strong> {{ donor.phone }}</p>
+                            <p><strong>Last Donation:</strong> {{ donor.last_donation_date or 'Never' }}</p>
+                            <p><strong>Health Status:</strong> {{ donor.health_status }}</p>
+                            {% if donor.distance_score %}
+                                <p><strong>Match Score:</strong> {{ "%.2f"|format(donor.distance_score) }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <p>No donors found matching your criteria.</p>
+                    <a href="{{ url_for('donor_register') }}" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Become First Donor
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
